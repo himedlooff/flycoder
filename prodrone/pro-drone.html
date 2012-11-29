@@ -1,0 +1,630 @@
+<!doctype html>
+ 
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>ProDrone</title>
+	<style type="text/css">
+	* {
+		margin: 0;
+		padding: 0;
+		list-style-type: none;
+		box-sizing: border-box;
+	}
+	
+	html,
+	body {
+		height: 100%;
+		font: 100%/1 "Courier New", Courier, monospace;
+		font-family: Tahoma, Geneva, sans-serif;
+		background: #fff url(img/graphy_custom.png) repeat top left;
+	}
+	
+	.drawer,
+	.field {
+		height: 600%;
+		padding: 20px;
+		float: left;
+	}
+	.drawer {
+		position: absolute;
+		z-index: 1;
+		top: 0;
+		left: 0;
+		width: 560px;
+		background: #fff url(img/retina_wood.png) repeat top left;
+		border-right: 1px solid #603600;
+	}
+	.field {
+		z-index: 2;
+		width: 100%;
+		box-shadow: inset 450px 0 4px rgba(0,0,0,1);
+	}
+	
+	/* Base language object */
+	.l-object {
+		display: block;
+		width: 250px;
+		height: 50px;
+		padding: 10px;
+		
+		font-size: 30px;
+		line-height: 30px;
+		color: white;
+		text-shadow: 1px 1px 1px rgba(0,0,0,.6);
+		border-radius: 4px;
+		box-shadow: 1px 1px 1px rgba(0,0,0,.6);
+		-webkit-transition: .1s box-shadow ease-out;
+		
+		-webkit-user-select: none;
+		cursor: pointer;
+	}
+	.l-object.ui-draggable-dragging,
+	.ui-draggable-dragging > ol > .l-object {
+		box-shadow: inset 2px 2px 3px rgba(0,0,0,.1), 9px 9px 1px rgba(0,0,0,.4);
+	}
+	.drawer .l-object {
+		display: inline-block;
+		margin-bottom: 4px;
+	}
+	.l-object > ol {
+		float: left;
+		width: 100%;
+	}
+	.code-block {
+		border-radius: 4px;
+	}
+	.field > .code-block {
+		position: absolute;
+	}
+	.code-block > ol > .l-object {
+		border-radius: 0;
+		margin-bottom: 1px;
+	}
+	.code-block > ol > .l-object:first-child {
+		border-top-left-radius: 4px;
+		border-top-right-radius: 4px;
+	}
+	.code-block > ol > .l-object:last-child {
+		border-bottom-left-radius: 4px;
+		border-bottom-right-radius: 4px;
+	}
+	
+	/* Language types */
+	.l-t-control {
+		background: #FFA500;
+	}
+	.l-t-operator {
+		background: #32CD32;
+	}
+		.l-t-operator > ol > li {
+			float: left;
+			width: 80px;
+			height: 50px;
+			margin-top: -10px;
+			overflow: hidden;
+			text-align: center;
+			line-height: 50px;
+		}
+		.l-t-operator > ol > .l-t-operator-symbol {
+			width: 70px;
+		}
+		.l-t-operand {
+			color: #000;
+			background: white;
+			box-shadow: inset 1px 1px 3px rgba(0,0,0,.6);
+		}
+		.l-t-operand .l-object {
+			/*width: 80px;*/
+			overflow: hidden;
+			border-radius: 0;
+			box-shadow: inset 1px 1px 3px rgba(0,0,0,.6);
+		}
+		.l-t-operator > ol > .l-t-operand > ol > .l-t-operator {
+			/*width: 230px;
+			padding-left: 0;
+			padding-right: 0;*/
+			border-radius: 0;
+			box-shadow: inset 0 0 50px 4px rgba(0,0,0,.7);
+		}
+	.l-t-variable {
+		background: #FF4500;
+	}
+	
+	.l-t-control {
+			height: 100px;
+	}
+		.l-t-control .l-t-label,
+		.l-t-control .l-t-condition,
+		.l-t-function .l-t-label,
+		.l-t-function .l-t-condition,
+		.l-t-function .l-t-label + .l-t-statement {
+			float: left;
+			width: 115px;
+			margin-top: -10px;
+		}
+		.l-t-control .l-t-label,
+		.l-t-function .l-t-label {
+				overflow: hidden;
+				line-height: 50px;
+		}
+		.l-t-control .l-t-condition,
+		.l-t-function .l-t-condition,
+		.l-t-function .l-t-statement {
+			height: 50px;
+			overflow: hidden;
+			text-align: center;
+			line-height: 50px;
+			color: #000;
+			background: white;
+			box-shadow: inset 1px 1px 3px rgba(0,0,0,.6);
+		}
+			.l-t-control .l-t-condition.s-hover,
+			.l-t-function .l-t-condition.s-hover,
+			.l-t-function .l-t-statement.s-hover {
+				box-shadow: 0 0 3px 3px #fff, 0 0 18px 4px #000;
+			}
+			.l-t-condition > ol > .l-object {
+				overflow: hidden;
+				border-radius: 0;
+				box-shadow: inset 1px 1px 3px rgba(0,0,0,.6);
+			}
+		.l-t-control .l-t-statement,
+		.l-t-function .l-t-statement {
+			height: 50px;
+			margin-top: -10px;
+			overflow: hidden;
+			text-align: center;
+			line-height: 50px;
+			color: #000;
+			background: white;
+			box-shadow: inset 1px 1px 3px rgba(0,0,0,.6);
+		}
+			.l-t-control .l-t-statement.s-hover,
+			.l-t-function .l-t-statement.s-hover {
+				box-shadow: 0 0 3px 3px #fff, 0 0 18px 4px #000;
+			}
+			.l-t-statement > ol > .l-object {
+				overflow: hidden;
+				border-radius: 0;
+				box-shadow: inset 1px 1px 3px rgba(0,0,0,.6);
+			}
+	
+	.l-t-variable {
+		width: 200px;
+		text-align: center;
+	}
+	.l-t-function {
+		background: #483D8B;
+	}
+	
+	/* States */
+	.s-highlight {
+		background: red;
+	}
+	.s-active {
+		background: green;
+	}
+	.s-hover {
+		border-bottom: 10px solid yellow;
+		box-shadow: 0 0 3px 3px yellow, 0 0 18px 4px #000;
+	}
+	.header {
+		font-size: 20px;
+		width: 100%;
+		margin: 20px 0 10px;
+		color: #603600;
+		border-bottom: 1px solid #603600;
+		text-shadow: -1px -1px 1px rgba(255,255,255,.8);
+	}
+	.header small {
+		font-size: 40%;
+		font-style: italic;
+	}
+	.header:first-child {
+		margin-top: 15px;
+		margin-bottom: 30px;
+		font-size: 40px;
+		border-bottom: none;
+	}
+	</style>
+</head>
+<body>
+
+<!-- Drawer of language objects -->
+<ul class="drawer">
+	<li class="header">ProDrone <small>Running the Fly Programming Language</small></li>
+	<li class="header">Controls</li>
+	<li class="l-object l-t-control l-t-control-click">
+		<ol>
+			<li class="l-t-label">on click</li>
+			<li class="l-t-statement"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-control l-t-control-while">
+		<ol>
+			<li class="l-t-label">while</li>
+			<li class="l-t-condition"></li>
+			<li class="l-t-statement"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-control l-t-control-if">
+		<ol>
+			<li class="l-t-label">if</li>
+			<li class="l-t-condition"></li>
+			<li class="l-t-statement"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-control l-t-control-elseif">
+		<ol>
+			<li class="l-t-label">else if</li>
+			<li class="l-t-condition"></li>
+			<li class="l-t-statement"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-control l-t-control-else">
+		<ol>
+			<li class="l-t-label">else</li>
+			<li class="l-t-statement"></li>
+		</ol>
+	</li>
+	<li class="header">Operators</li>
+	<li class="l-object l-t-operator l-t-operator-gt">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">&gt;</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-lt">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">&lt;</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-equal">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">==</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-and">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">and</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-or">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">or</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-addition">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">+</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-subtraction">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">-</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-plusequals">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">+=</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-minusequals">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">-=</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-operator l-t-operator-assignment">
+		<ol>
+			<li class="l-t-operand"></li>
+			<li class="l-t-operator-symbol">=</li>
+			<li class="l-t-operand"></li>
+		</ol>
+	</li>
+	<li class="header">Variables</li>
+	<li class="l-object l-t-variable">a</li>
+	<li class="l-object l-t-variable">b</li>
+	<li class="l-object l-t-variable">.01</li>
+	<li class="l-object l-t-variable">.1</li>
+	<li class="l-object l-t-variable">.5</li>
+	<li class="l-object l-t-variable">.9</li>
+	<li class="l-object l-t-variable">i</li>
+	<li class="l-object l-t-variable">j</li>
+	<li class="l-object l-t-variable">height</li>
+	<li class="l-object l-t-variable">rotation</li>
+	<li class="header">Functions</li>
+	<li class="l-object l-t-function l-t-function-takeoff">take off</li>
+	<li class="l-object l-t-function l-t-function-land">land</li>
+	<li class="l-object l-t-function l-t-function-stop">stop</li>
+	<li class="header"></li>
+	<li class="l-object l-t-function l-t-function-up">
+		<ol>
+			<li class="l-t-label">up</li>
+			<li class="l-t-condition"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-function l-t-function-down">
+		<ol>
+			<li class="l-t-label">down</li>
+			<li class="l-t-condition"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-function l-t-function-front">
+		<ol>
+			<li class="l-t-label">front</li>
+			<li class="l-t-condition"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-function l-t-function-back">
+		<ol>
+			<li class="l-t-label">back</li>
+			<li class="l-t-condition"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-function l-t-function-left">
+		<ol>
+			<li class="l-t-label">left</li>
+			<li class="l-t-condition"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-function l-t-function-right">
+		<ol>
+			<li class="l-t-label">right</li>
+			<li class="l-t-condition"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-function l-t-function-clockwise">
+		<ol>
+			<li class="l-t-label">clockw</li>
+			<li class="l-t-condition"></li>
+		</ol>
+	</li>
+	<li class="l-object l-t-function l-t-function-counterclockwise">
+		<ol>
+			<li class="l-t-label">c-clockw</li>
+			<li class="l-t-condition"></li>
+		</ol>
+	</li>
+</ul>
+
+<!-- The field into which language objects can be dropped -->
+<ul class="field">
+</ul>
+
+<script src="js/jquery-1.8.2.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script>
+$(function() {
+	
+	var $drawer = $('.drawer');
+	var $field = $('.field');
+	var $lObject = $('.l-object');
+	
+	var draggableOptionsFromDrawer = {
+		helper: 'clone',
+		revert: 'invalid',
+		zIndex: 100
+	};
+	
+	var draggableOptionsFromField = {
+		zIndex: 100
+	};
+	
+	var droppableOptionsForDrawer = {
+		// Items dragged from the field and dropped
+		// onto the drawer get removed from the dom
+		accept: '.field .code-block, .field .l-object',
+		drop: function(event, ui) {
+			ui.draggable.remove();
+		}
+	};
+	
+	var droppableOptionsForField = {
+		accept: '.l-object',
+		drop: function(event, ui) {
+			alert('for main field');					///  IH  ON ALL DROPS on main field
+			var $this = $(this),
+					$expression = ui.draggable.clone(),
+					$droppableExpressions = $expression.find('.l-t-operand, .l-t-condition, .l-t-statement'),
+					$codeBlock = $('<li />').addClass('code-block'),
+					$ol = $('<ol />');
+			
+			
+			// Create a block to put the expression into
+			$this.append($codeBlock);
+			$codeBlock
+				.css({
+					top: ui.helper.position().top,
+					left: ui.helper.position().left
+				})
+				.append($ol)
+				.droppable(droppableOptionsForCodeBlocks)
+				.draggable(draggableOptionsFromField);
+			$ol.append($expression);
+			
+			// Initiate droppable expressions
+			if ($droppableExpressions.hasClass('l-t-operand')) {
+				console.log('operand drop options');
+				$droppableExpressions.droppable(droppableOptionsForOperands);
+			}
+			else if ($droppableExpressions.hasClass('l-t-condition') || $droppableExpressions.hasClass('l-t-statement')) {
+				console.log('control drop options');
+				$droppableExpressions.filter('.l-t-condition').droppable(droppableOptionsForOperands);
+				$droppableExpressions.filter('.l-t-statement').droppable(droppableOptionsForStatements);
+			}
+			else {
+				console.log('expression drop options');
+				$droppableExpressions.droppable(droppableOptionsForExpressions);
+			}
+		}
+	};
+	
+	var droppableOptionsForCodeBlocks = {
+		accept: '.l-object, .code-block',
+		greedy: true,
+		hoverClass: 's-hover',
+		drop: function(event, ui) {
+			alert('code blocks');   // IH for code blocks
+			var $this = $(this);
+			var $expression = determineExpressionFromUiDraggable(ui.draggable);
+			
+			// Add the l-objects to .code-block > ol:last-child
+			$this.children('ol:last-child').append($expression);
+		}
+	};
+	
+	var droppableOptionsForStatements = {
+		accept: '.l-object, .code-block',
+		greedy: true,
+		hoverClass: 's-hover',
+		drop: function(event, ui) {
+			alert('statements'); 			// IH for statements
+			var $this = $(this);
+			var $expression = determineExpressionFromUiDraggable(ui.draggable);
+			
+			// Create a list to put the expression in
+			var $ol = $('<ol />');
+			$this.append($ol);
+			$ol.append($expression);
+			
+			// Update the layout to account for the new child
+			expandLObjectWidthHeight($expression);
+		}
+	};
+	
+	var droppableOptionsForOperands = {
+		// [todo] update to check what's inside of .code-block
+		accept: '.l-t-variable, .l-t-operator, .code-block',
+		greedy: true,
+		hoverClass: 's-hover',
+		drop: function(event, ui) {
+			alert('operands');			// IH for operands
+			var $this = $(this);
+			var $expression = determineExpressionFromUiDraggable(ui.draggable);
+			
+			// Create a list to put the expression in
+			var $ol = $('<ol />');
+			$this.append($ol);
+			$ol.append($expression);
+			
+			// Update the layout to account for the new child
+			expandLObjectWidth('operand', $(this));
+			
+			// Disable dropping now that something is inside it
+			// [todo] will need to change this later to enable deeper nesting
+			//console.log('droppable disabled');
+			$this.droppable('disable');
+		}
+	};
+		
+	var droppableOptionsForExpressions = {
+		accept: '.l-object',
+		greedy: true,
+		hoverClass: 's-hover',
+		drop: function(event, ui) {
+			var $this = $(this);
+			// If the expression is from the drawer clone it,
+			// if it's from the field then just change its dom order
+			var $expression = (ui.draggable.parent().hasClass('drawer')) ? ui.draggable.clone() : ui.draggable;
+			// Create a list to put the expression in
+			var $ol = $('<ol />');
+					
+			$this.append($ol);
+			$ol.append($expression);
+		}
+	};
+	
+	// Initialize the initial objects
+	$lObject.draggable(draggableOptionsFromDrawer);
+	$field.droppable(droppableOptionsForField);
+	$drawer.droppable(droppableOptionsForDrawer);
+	
+	/* Utility Functions */
+	
+	function determineExpressionFromUiDraggable(uiDraggable) {
+		var $expression = $();
+		// If this is a .code-block strip the expression out
+		// If this is coming fromt he drawer then duplicate it 
+		if (uiDraggable.hasClass('code-block')) {
+			$expression = $(uiDraggable.children('ol').html());
+			uiDraggable.remove();
+		}
+		else if (uiDraggable.parent().hasClass('drawer')) {
+			$expression = uiDraggable.clone();
+		}
+		return $expression;
+	}
+
+	function expandLObjectWidth(type, $this) {
+		var offset;
+		switch (type) {
+			case 'statement':
+				offset = $this.children().children().outerWidth() - $this.width();
+				//console.log($this.width(),offset,$this.children().children().outerWidth() + (offset * -1));
+				if (offset < 0) {
+					$this.children().children().width($this.children().children().width() + (offset * -1));
+				}
+				else {
+					$this.width($this.width() + offset);
+					$this.parent().parent().width($this.parent().parent().width() + offset);
+				}
+				//console.log($this.parent().children('.l-t-statement').size());
+				if($this.parent().children('.l-t-statement').children().children().width() < $this.parent().children('.l-t-statement').width()) {
+					$this.parent().children('.l-t-statement').children().children().width($this.parent().children('.l-t-statement').width());
+				}
+				break;
+			case 'operand':
+				offset = $this.children().children().outerWidth() - $this.width();
+				$this.width( $this.width() + offset );
+				$this.parent().parent().width( $this.parent().parent().width() + offset );
+				break;
+		}
+		return $this;
+	}
+	
+	function expandLObjectWidthHeight($lastChild) {
+		// Move up the branch until we reach .field 
+		//console.log($lastChild.parent());
+		if (!$lastChild.parent().hasClass('field')) {
+			
+			//console.log($lastChild.attr('class'));
+			
+			var lastWidth = $lastChild.outerWidth();
+			var lastHeight = $lastChild.height();
+			
+			if (lastWidth > $lastChild.parent().width()) {
+				$lastChild.parent().width(lastWidth);
+			}
+			if (lastHeight > $lastChild.parent().height()) {
+				$lastChild.parent().height(lastHeight);
+			}
+			
+			// Loop
+			$lastChild = $lastChild.parent();
+			expandLObjectWidthHeight($lastChild);
+		}
+	}
+	
+});
+</script>
+
+</body>
+</html>
